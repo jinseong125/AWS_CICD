@@ -1,0 +1,36 @@
+# Nginx + Tomcat 9.0
+# http:public-ip 접속 시
+# Nginx -> Tomcat 순으로 접속되도록 docker-compose.yml 파일을 작성하여 실행합니다.
+# Host(EC2) - Container간 볼륨 처리
+# 1) ~/tomcat/webapps - /usr/local/tomcat/webapps
+# intdex.html
+# 2) ~/nginx/conf.d   - /etc/nginx/conf.d
+# tomcat-proxy.conf
+
+version: "3.8"
+
+services:
+  tomcat-was: # 서비스 tomcat-was
+    image: tomcat:9.0
+    container_name: tomcat-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ~/tomcat/webapps:/usr/local/tomcat/webapps
+    networks:
+      - server-net
+  nginx-proxy:  # 서비스 nginx-proxy
+    image: nginx:latest
+    container_name: nginx-server
+    ports:
+      - "80:80"
+    volumes:
+      - ~/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - server-net
+    depends_on:
+      - tomcat-was
+
+networks:
+  server-net:
+    driver: bridge
